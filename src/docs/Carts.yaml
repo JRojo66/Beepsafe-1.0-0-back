@@ -1,0 +1,129 @@
+paths:
+  /api/cart:
+    get:
+      summary: Returns a list of carts.
+      tags:
+        - Carts
+      description: Returns the complete list of carts. The list can be limited by parameter.
+      responses:
+        '200':
+          description: Successfull - returns all carts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Cart'
+        '400':
+          description: Error - Wrong input parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: The 'limit' parameter must be a number
+        '500':
+          description: Error accessing dataBase
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Unexpected server error - Try again later or contact admninistrator
+                  detail: 
+                    type: string
+                    example: lalala is not defined
+  /api/cart/{cid}:                  
+    get:
+      summary: Returns one cart.
+      tags:
+        - Carts
+      parameters:
+      - name: cid
+        in: path
+        required: true
+        description: Cart's cid
+      description: Returns cart by id
+      responses:
+        '200':
+          description: Successfull - returns cart
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Cart'
+        '400':
+          description: Error - Wrong input parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Pls, enter a valid id...
+        '404':
+          description: Error - Cart not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: cart id 66789f7c7e06af63bddf1c10 not found                   
+  /api/cart/{cid}/product/{pid}:
+    post:
+      summary: Adds product to cart
+      tags:
+        - Carts
+      parameters:
+      - name: cid
+        in: path
+        required: true
+        description: Cart's cid
+      - name: pid
+        in: path
+        required: true
+        description: Product's id
+      description: Adds product to cart
+      responses:
+        '200':
+          description: Successfull - adds product
+          content: 
+            application/json:
+              schema:
+                type: object
+                properties:
+                  payload:
+                    type: string
+                    example: Cart updated
+        '400':
+          description: Cant find product or cart
+          content: 
+            application/json:
+              schema:
+                type: object
+                properties:
+                  payload:
+                    type: string
+                    example: Can't find Cart id xxx/Can't find product id xxx
+        '401':
+          description: Product owmer
+          content: 
+            application/json:
+              schema:
+                type: object
+                properties:
+                  payload:
+                    type: string
+                    example: Can't buy your own products... Doesn't make sense, ask Coderhouse why...
+
+            
+
+

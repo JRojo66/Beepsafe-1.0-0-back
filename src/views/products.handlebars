@@ -1,0 +1,40 @@
+<h1>Products</h1>
+<hr />
+<p><strong>Welcome, {{user.name}}</strong></p>
+<input type="text" value="{{cartId}}" id="cart" hidden />
+{{#each products.docs}}
+  <div class="container">
+    <div class="row">
+      <div class="col mx-1">
+        <div class="card" style="width: 75vw;">
+          <div class="card-body">
+            <h5 class="card-title">{{title}}</h5>
+            <img class="image" src="{{thumbnails.[0]}}" alt={{title}} />
+            <p class="card-text">{{description}}</p>
+            <p class="card-text"><strong>$ {{price}}</strong></p>
+            <button onclick="buy('{{_id}}')">Add to Cart</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{{/each}}
+
+<a href="products?page=1">Page 1</a>
+
+{{#if products.hasPrevPage}}
+  <a href="/products?page={{products.prevPage}}">Previous</a>
+{{/if}}
+
+{{#if products.hasNextPage}}
+  <a href="/products?page={{products.nextPage}}">Next</a>
+{{/if}}
+
+<a href="/products?page={{products.totalPages}}">Last Page</a>
+<br />
+<a href="/cart/{{cartId}}">See Cart</a>
+<br />
+<a href="/">Home</a>
+
+<br /><br />
+<script src="/js/products.js"></script>

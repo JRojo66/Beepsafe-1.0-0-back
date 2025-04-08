@@ -1,0 +1,10 @@
+<h1>Products</h1>
+<hr />
+<ul id="productsRealTime">
+  {{#each rtproducts}}
+    <li>{{title}}</li>
+  {{/each}}
+</ul>
+<a href="/">Home</a>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/js/realTime.js"></script>

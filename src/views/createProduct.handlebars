@@ -1,0 +1,20 @@
+<h2>Create product</h2>
+<hr />
+<form action="api/products" method="post" onsubmit="handleStatus()">
+  <input type="text" name="title" placeholder="title" />
+  <input type="text" name="description" placeholder="description" />
+  <input type="text" name="code" placeholder="code" />
+  <input type="number" name="price" placeholder="price" />
+  {{!-- <label for="status">Status:</label>
+  <input type="checkbox" id="status" name="status" placeholder="status" required /> --}}
+    {{!-- <input type="boolean" name="status" placeholder="status" /> --}}
+  <input type="number" name="stock" placeholder="stock" />
+  <input type="text" name="category" placeholder="category" />
+  <input type="url" name="thumbnails[0]" placeholder="thumbnail 1" />
+  <input type="url" name="thumbnails[1]" placeholder="thumbnail 2" />
+  <input type="url" name="thumbnails[2]" placeholder="thumbnail 3" />
+  <br /><br />
+  <input type="submit" value="Create Product" />
+</form>
+<br /><br />
+<a href="/">Home</a>

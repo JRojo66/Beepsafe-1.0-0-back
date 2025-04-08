@@ -1,0 +1,91 @@
+paths:
+  /api/sessions/login:
+    post:
+      summary: Logs in
+      tags:
+        - Login
+      description: Logs in via jwt
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email: 
+                  type: string
+                  example: lionel@test.com
+                password:
+                  type: string
+                  example: 123
+      responses:
+        '200':
+          description: Successfull login
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  userLogged:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                        example: Lionel
+                        description: User's first name
+                      lastName:
+                        type: string
+                        example: Messi
+                        description: User's last name
+                      email:
+                        type: string
+                        example: lionel@messi.com
+                        description: User's email
+                      age:
+                        type: integer
+                        example: 37
+                        description: User's age (optional)
+                      role:
+                        type: string
+                        example: user
+                        description: User's role (for example "user", "admin")
+                      password:
+                        type: string
+                        example: "********"
+                        description: User's password (hidden)
+                      cart:
+                        type: string
+                        example: 66789fdb7e06af63bddf1c13
+                        description: User's cart identifier (optional)
+                      _id:
+                        type: string
+                        example: 66789fdb7e06af63bddf1c13
+                        description: User's unique identifier
+                      createdAt:
+                        type: string
+                        format: date-time
+                        example: 2024-06-23T22:21:15.818Z
+                        description: Date and time of user creation
+                      updatedAt:
+                        type: string
+                        format: date-time
+                        example: 2024-07-25T00:58:39.380Z
+                        description: Date and time of user update
+                      __v:
+                        type: integer
+                        example: 0
+                        description: Version number (internal use)
+                  token:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiTGlvbmVsIiwibGFzdE5hbWUiOiJNZXNzaSIsImVtYWlsIjoibGlvbmVsQG1lc3NpLmNvbSIsImFnZSI6MzcsInJvbGUiOiJ1c2VyIiwicGFzc3dvcmQiOiIqKioqKioqKiIsImNhcnQiOiI2Njc4OWZkYjdlMDZhZjYzYmRkZjFjMTMiLCJfaWQiOiI2Njc4OWZkYjdlMDZhZjYzYmRkZjFjMTUiLCJjcmVhdGVkQXQiOiIyMDI4LTA2LTIzVDIyOjIxOjE1LjgxOFoiLCJ1cGRhdGVkQXQiOiIyMDI0LTA3LTI1VDAwOjU8OjM5LjM4MFoiLCJfX3YiOjAsImlhdCI6MTcyMjE5MzAxMiwiZXhwIjoxNzIyMTk2NjEyfQ.rj1vS9SEdtS8gxurxbdAQDGkSgxRmlE8WYMZ9i-Typw
+                    description: Access token for authentication
+        '400':
+            description: Missing email or password or no user with that mail
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    payload:
+                      type: string
+                      example: "Enter email and password or Wrong credentials...There is no user with that mail...!!!"          
+

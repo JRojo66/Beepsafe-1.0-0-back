@@ -1,0 +1,11 @@
+<h2>Logout</h2>
+<hr>
+<form action="api/sessions/logout" method="get">
+
+    {{#if error}}
+        <div style="font-weight: bolder; color: red;">{{error}}</div>        
+    {{/if}}
+    <input type="submit" value="Logout">
+</form>
+<br><br>
+{{>menu}}

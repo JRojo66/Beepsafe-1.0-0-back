@@ -1,0 +1,16 @@
+<h2>Login</h2>
+<hr>
+<form action="api/sessions/login" method="post">
+
+    {{#if error}}
+        <div style="font-weight: bolder; color: red;">{{error}}</div>        
+    {{/if}}
+    <input type="text" name="email" placeholder="email">
+    <input type="password" name="password" placeholder="password">
+    <input type="text" name="web" value="web" hidden>
+    <input type="text" name="loginStrategy" value="jwt" hidden>
+    <br><br>
+    <input type="submit" value="Login">
+</form>
+<br><br>
+{{>menu}}

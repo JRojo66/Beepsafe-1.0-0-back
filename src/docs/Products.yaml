@@ -1,0 +1,63 @@
+paths:
+  /api/products:
+    get:
+      summary: Returns a list of products.
+      tags:
+        - Products
+      description: Returns the complete list of products of the site and pagination parameters.
+      responses:
+        '200':
+          description: Successfull - returns all products
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedProducts'
+        '400':
+          description: Error - Wrong input parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: The 'query' parameter must be a JSON
+    post:
+      summary: Creates product.
+      tags:
+        - Products
+      description: Creates new products.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+      responses: 
+        '200':
+          description: Successfull product creation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateProductResponse'              
+        '400':
+                  description: Error creating product. Input required, wrong data type, or already existing product
+                  content:
+                    application/json:
+                      schema:
+                        type: object
+                        properties:
+                          error:
+                            type: string
+                            example: Description must be a non-empty string
+                            description: Error description
+        '500':
+                  description: Error accessing dataBase or socket io fail
+                  content:
+                    application/json:
+                      schema:
+                        type: object
+                        properties:
+                          error:
+                            type: string
+                            example: Unexpected server error - Try again later or contact admninistrator
+                            description: Error description

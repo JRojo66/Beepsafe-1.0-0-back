@@ -1,0 +1,31 @@
+<h1>Cart</h1>
+<h3>{{user.name}}'s cart. Cart id: {{cart._id}}</h3>
+<input type="text" value="{{cart._id}}" id="cartCheckout" hidden />
+
+<hr />
+{{#each cart.products}}
+  <div class="container">
+    <div class="row">
+      <div class="col mx-1">
+        <div class="card" style="width: 75vw;">
+          <div class="card-body">
+            <h5 class="card-title">{{product.title}}</h5>
+            <img src="{{product.thumbnails.[0]}}" alt={{title}}>
+            <p class="card-text">{{product.description}}</p>
+            <p class="card-text"><strong>$ {{product.price}}</strong></p>
+            <p class="card-text"><strong>qty: {{qty}}</strong></p>
+            <button onclick="deleteProduct('{{product._id}}')">delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{{/each}}
+<button onclick="emptyCart('{{cart._id}}')">Empty cart</button>
+<button onclick="checkout('{{cart._id}}')">Checkout</button>
+
+<br />
+<a href="/products">Add products</a>
+<a href="/">Home</a>
+
+<script src="/js/checkout.js"></script>

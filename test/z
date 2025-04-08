@@ -1,0 +1,128 @@
+import { describe, it, before, afterEach } from "mocha";
+import { expect } from "chai";
+import supertest from "supertest";
+import mongoose from "mongoose";
+import { isValidObjectId, ObjectId } from "mongoose";
+import { config } from '../src/config/config.js';
+
+const requester = supertest(`${config.ROOT_URL}`);
+
+describe("Test User and Cart creation. Test Add products to cart. Test purchase", function () {
+  this.timeout(10000);
+
+  after(async function () {
+    // Find created user
+    let mockUserToDelete = await mongoose.connection
+      .collection("users")
+      .findOne({ email: "jorge@testzzz.com" });
+
+    // Delete created user    
+    await mongoose.connection
+      .collection("users")
+      .deleteMany({ email: mockUserToDelete.email });
+
+    // Delete created user's cart    
+    await mongoose.connection
+      .collection("carts")
+      .deleteMany({ _id: mockUserToDelete.cart });
+
+    // Delete created ticket
+    await mongoose.connection
+    .collection("tickets")
+    .deleteMany({ purchaser: "jorge@testzzz.com" });
+  });
+
+  it("register must create user", async function () {
+    const mockUser = {
+      name: "jorge",
+      lastName: "Bergoglio",
+      email: "jorge@testzzz.com",
+      age: "82",
+      password: "123",
+    };
+    const response = await requester
+      .post("/api/sessions/register")
+      .send(mockUser)
+      .expect(201);
+
+    const responseExpect = JSON.parse(response.text);
+    const newUser = responseExpect.newUser;
+    const expectedTimestamp = new Date(responseExpect.CreatedAt);
+
+    expect(responseExpect.message).to.equal("Register OK");
+    expect(newUser.name).to.equal("Jorge");
+    expect(newUser.lastName).to.equal("Bergoglio");
+    expect(newUser.email).to.equal("jorge@testzzz.com");
+    expect(newUser.age).to.equal(82);
+    expect(newUser.password).to.equal("********");
+    expect(isValidObjectId(newUser.cart)).to.exist;
+    expect(isValidObjectId(newUser._id)).to.exist;
+    expect(expectedTimestamp).to.be.instanceOf(Date);
+    expect(newUser.__v).to.exist;
+  });
+
+  it("must login with jwt create cart and purchase", async function () {
+    let mockUserFindCart = await mongoose.connection
+      .collection("users")
+      .findOne({ email: "jorge@testzzz.com" });
+
+    const cart = await mongoose.connection
+      .collection("carts")
+      .findOne({ _id: mockUserFindCart.cart });
+
+    const expectedTimestamp1 = new Date(cart.CreatedAt);
+    const expectedTimestamp2 = new Date(cart.UpdatedAt);
+
+    expect(cart).to.not.be.null;
+    expect(Array.isArray(cart.products)).to.be.true;
+    expect(cart.products).to.be.empty;
+    expect(isValidObjectId(cart._id)).to.exist;
+    expect(expectedTimestamp1).to.be.instanceOf(Date);
+    expect(expectedTimestamp2).to.be.instanceOf(Date);
+
+    // Test loginjwt
+    const login = {
+      email: "jorge@testzzz.com",
+      password: "123",
+    };
+    const result = await requester
+      .post("/api/sessions/login")
+      .send(login);
+
+    const cookieResult = result.headers["set-cookie"][0];
+    expect(cookieResult).to.be.ok;
+    const cookie = {
+      name: cookieResult.split("=")[0],
+      value: cookieResult.split("=")[1],
+    };
+    expect(cookie.name).to.be.ok.and.equal("codercookie");
+    expect(cookie.value).to.be.ok;
+
+    // Test create cart  
+    const cid = cart._id;
+    const resultAdd = await requester
+      .post("/api/cart/" + cid + "/product/662c3576518100669b538deb")
+      .set("Cookie", [`${cookie.name}=${cookie.value}`])
+      .expect(200);
+    const cartwithProduct = await mongoose.connection
+      .collection("carts")
+      .findOne({ _id: mockUserFindCart.cart });
+    expect(cartwithProduct.products[0].product.toString()).to.equal(
+      "662c3576518100669b538deb"
+    );
+    expect(cartwithProduct.products[0].qty).to.equal(1);
+    
+    // Test Purchase
+    const MockTicket = await requester
+      .post("/api/cart/"+cid+"/purchase")
+      .set("Cookie", [`${cookie.name}=${cookie.value}`])
+      const mockTicket = await mongoose.connection
+      .collection("tickets")
+      .findOne({purchaser: "jorge@testzzz.com"});
+      expect(mockTicket.products[0].product.toString()).to.be.equal("662c3576518100669b538deb")
+      expect(mockTicket.products[0].qty).to.be.equal(1)
+  });
+
+});
+
+
