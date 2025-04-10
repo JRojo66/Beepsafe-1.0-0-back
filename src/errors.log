@@ -8,3 +8,6 @@
 {"level":"error","message":"error is not defined"}
 {"level":"error","message":"E11000 duplicate key error collection: Beepsafe.users index: email_1 dup key: { email: \"javier.rojo66@gmail.com\" }"}
 {"level":"error","message":"error is not defined"}
+{"level":"error","message":"newCart is not defined"}
+{"level":"error","message":"newCart is not defined"}
+{"level":"error","message":"newCart is not defined"}

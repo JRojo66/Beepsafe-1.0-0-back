@@ -28,10 +28,10 @@ export const initPassport = () => {
           let { name, phone } = req.body;
           let exists = await userService.getUsersBy({ email: username });
           if (exists) {
-            return done(null, false);
+            return done(null, false, { message: 'El usuario ya existe.' }); // Añade un objeto info
           }
           password = generateHash(password);
-          // let newCart = await cartService.addCart();
+          let newCart = await cartService.addCart();
           let newUser = {
             name,
             phone,
