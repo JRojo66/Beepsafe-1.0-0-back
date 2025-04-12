@@ -30,7 +30,7 @@ let io;
 // Configuración de CORS
 app.use(cors({
   origin: function (origin, callback) {
-      if (!origin || origin.startsWith('http://127.0.0.1')) {
+      if (!origin || origin.startsWith('http://127.0.0.1') ) {
           callback(null, origin);
       } else {
           callback(new Error('Not allowed by CORS'));

@@ -26,19 +26,23 @@ export const initPassport = () => {
       async (req, username, password, done) => {
         try {
           let { name, phone } = req.body;
-          let exists = await userService.getUsersBy({ email: username });
-          if (exists) {
-            return done(null, false, { message: 'El usuario ya existe.' }); // Añade un objeto info
+          let existsEmail = await userService.getUsersBy({ email: username });
+          let existsName = await userService.getUsersBy({ name: name });
+          if (existsEmail) {
+            return done(null, false, { message: 'Ya hay una cuenta registrada con ese email' }); // Añade un objeto info
+          }
+          if (existsName) {
+            return done(null, false, { message: 'El nombre elegido ya está en uso. Elegí uno diferente' }); // Añade un objeto info
           }
           password = generateHash(password);
-          let newCart = await cartService.addCart();
+          //let newCart = await cartService.addCart();
           let newUser = {
             name,
             phone,
             email: username,
             password,
             last_connection: new Date(),
-            cart: newCart._id,
+            //cart: newCart._id,
           };
           //newUser = new UserDTOfirstLettertoUpperCase(newUser); Forces name first character to uppercase
           newUser = await userService.createUser(newUser);
@@ -93,12 +97,12 @@ export const initPassport = () => {
           }
           let user = await userService.getUsersBy({ email });
           if (!user) {
-            let newCart = await cartService.addCart();
+            //let newCart = await cartService.addCart();
             user = await userService.createUser({
               name,
               email,
               profile,
-              cart: newCart._id,
+              //cart: newCart._id,
             });
           }
           return done(null, user);

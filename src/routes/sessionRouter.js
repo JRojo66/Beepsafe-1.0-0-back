@@ -14,7 +14,7 @@ router.post(
       }
       if (!user) {
         // 'info' puede contener un mensaje si la estrategia lo proporciona
-        return res.status(409).json({ error: "Ya existe una cuenta registrada con ese email" }); // Código 409 para conflicto
+        return res.status(409).json({ error: info?.message || "Error al registrar la cuenta." }); // Código 409 para conflicto
       }
       // Si el usuario se registró correctamente, puedes iniciar sesión aquí o enviar una respuesta de éxito
       req.logIn(user, (err) => {
