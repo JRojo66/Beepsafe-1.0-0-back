@@ -30,7 +30,8 @@ let io;
 // Configuración de CORS
 app.use(cors({
   origin: function (origin, callback) {
-      if (!origin || origin.startsWith('http://127.0.0.1') ) {
+      const allowedOrigins = ['http://127.0.0.1:58315', 'http://localhost:58315', 'http://127.0.0.1:8080', 'http://localhost:8080' ];
+      if (!origin || allowedOrigins.includes(origin)) {
           callback(null, origin);
       } else {
           callback(new Error('Not allowed by CORS'));
@@ -75,13 +76,19 @@ app.use(middLogger);
 app.use(
   // Configures sessions
   sessions({
-    secret: "config.SECRET",
-    resave: true,
-    saveUninitialized: true,
+    path: '/',
+    secret: config.SECRET,
+    resave: false,
+    saveUninitialized: false,
     store: MongoStore.create({
       ttl: 3600,
       mongoUrl: config.MONGO_URL,
     }),
+    cookie: {
+      httpOnly: true,
+      secure: false, // Cambiar a true si usás https
+      sameSite: "Lax", // O 'None' si tu frontend y backend están en diferentes dominios
+    },
   })
 );
 

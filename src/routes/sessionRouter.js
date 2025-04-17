@@ -29,8 +29,24 @@ router.post(
 );
 router.post(
   "/login",
-  passport.authenticate("login", { failureRedirect: "/api/sessions/error" }),
-  SessionsController.login
+  (req, res, next) => {
+    passport.authenticate("login", (err, user, info) => {
+      if (err) {
+        return next(err); // Handle server errors
+      }
+      if (!user) {
+        // Redirect to the error page with the error message from Passport
+        return res.status(409).json({ error: info?.message || "El usuario no existe" }); // Código 409 para conflicto
+      }
+      // If login successful, proceed to create session
+      req.logIn(user, (err) => {
+        if (err) {
+          return next(err);
+        }
+        return res.status(201).json({ message: "Login exitoso", user: user });
+      });
+    })(req, res, next);
+  }
 );
 router.post("/passwordReset", SessionsController.passwordReset);
 router.get("/error", SessionsController.error);

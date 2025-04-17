@@ -66,10 +66,10 @@ export const initPassport = () => {
         try {
           let user = await userService.getUsersBy({ email: username });
           if (!user || !user.password) {
-            return done(null, false);
+            return done(null, false, { message: 'El usuario no existe.' }); // Combined message
           }
           if (!isValidPassword(password, user.password)) {
-            return done(null, false);
+            return done(null, false, { message: 'La contraseña es incorrecta.' });
           }
 
           return done(null, user);

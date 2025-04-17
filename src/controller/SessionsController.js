@@ -12,25 +12,40 @@ export class SessionsController {
 
   static register = async (req, res) => {
     res.setHeader("Content-Type", "application/json");
-    return res.status(201).json({ message: "Register OK", newUser: req.user });
+    return res.status(201).json({ message: "Registro OK", newUser: req.user });
   };
 
   static login = async (req, res) => {
     let { email, password, loginStrategy } = req.body;
     if (!email || !password) {
       res.setHeader("Content-Type", "application/json");
-      return res.status(400).json({ payload: "Enter email and password" });
+      return res.status(400).json({ payload: "Ingrese nombre y contraseña" });
     }
     try {
       let user = await userService.getUsersBy({ email });
       if (!user)
         return res
           .status(400)
-          .send(`Wrong credentials...There is no user with that mail...!!!`);
+          .send(
+            `Credenciales incorrectas. No existe un usuario con ese mail!!!`
+          );
       user = new UserDTO(user);
       user = { ...user };
+
       let token = jwt.sign(user, SECRET, { expiresIn: "1h" });
-      res.cookie("codercookie", token, { httpOnly: true });
+      res.cookie("codercookie", token, {
+        path: "/",
+        httpOnly: true,
+        secure: false,
+        sameSite: "Lax",
+      });
+      // 🔥 GUARDAR AL USUARIO EN LA SESIÓN
+      req.session.user = user;
+      
+      console.log('req.session:', req.session);
+      console.log('req.session.passport:', req.session.passport);
+      console.log('req.user:', req.user);
+      
       await userService.updateUser(
         { email },
         { loginStrategy },
@@ -42,7 +57,7 @@ export class SessionsController {
       });
     } catch (error) {
       let errorData = {
-        title: "Error logging in",
+        title: "Error en el login",
         name: error.name,
         message: error.message,
         stack: error.stack,
@@ -57,46 +72,60 @@ export class SessionsController {
 
   static logout = async (req, res) => {
     try {
-      if (!req.user) {
+      console.log(req.session.user);
+      console.log("logout");
+      if (!req.session.user) {
         res.setHeader("Content-Type", "application/json");
-        return res.status(400).json({ error: `User is not logged...!!!` });
+        return res.status(400).json({ error: `User is not logged1...!!!` });
       }
-      if (req.user.loginStrategy === "jwt") {
-        const token = req.cookies.codercookie;
-        if (!token) {
-          res.setHeader("Content-Type", "application/json");
-          return res.status(400).json({ error: `User is not logged...!!!` });
+
+      req.session.destroy((err) => {
+        if (err) {
+          return res.status(500).json({ error: "Error destroying session" });
         }
-        const user = jwt.verify(token, SECRET);
-        const email = user.email;
-        await userService.updateUser(
-          { email },
-          { last_connection: new Date() }
-        );
-        res.clearCookie("codercookie");
-        res.setHeader("Content-Type", "application/json");
-        return res
-          .status(200)
-          .json({ payload: `Bye ${user.name}, hope to see you back soon!` });
-      }
-      if (req.user.loginStrategy === "gitHub") {
-        const userName = req.user.name;
-        req.logout((err) => {
-          if (err) {
-            return res.status(500).send("Error closing session");
-          }
-          req.session.destroy((err) => {
-            if (err) {
-              return res.status(500).send("Error destroying session");
-            }
-            res.clearCookie("connect.sid");
-            res.setHeader("Content-Type", "application/json");
-            return res
-              .status(200)
-              .json({ payload: `Bye ${userName}, hope to see you back soon!` });
-          });
-        });
-      }
+    
+        res.clearCookie('connect.sid'); // 👈 Limpia la cookie de sesión
+        return res.status(200).json({ message: "Sesión cerrada con éxito" });
+      });
+
+
+      // if (req.user.loginStrategy === "jwt") {
+      //   const token = req.cookies.codercookie;
+      //   if (!token) {
+      //     res.setHeader("Content-Type", "application/json");
+      //     return res.status(400).json({ error: `User is not logged2...!!!` });
+      //   }
+      //   const user = jwt.verify(token, SECRET);
+      //   const email = user.email;
+      //   await userService.updateUser(
+      //     { email },
+      //     { last_connection: new Date() }
+      //   );
+      //   res.clearCookie("codercookie");
+      //   res.setHeader("Content-Type", "application/json");
+      //   return res
+      //     .status(200)
+      //     .json({ payload: `Bye ${user.name}, hope to see you back soon!` });
+      // }
+      // if (req.user.loginStrategy === "gitHub") {
+      //   const userName = req.user.name;
+      //   req.logout((err) => {
+      //     if (err) {
+      //       return res.status(500).send("Error closing session");
+      //     }
+      //     req.session.destroy((err) => {
+      //       if (err) {
+      //         return res.status(500).send("Error destroying session");
+      //       }
+      //       res.clearCookie("connect.sid");
+      //       res.setHeader("Content-Type", "application/json");
+      //       return res
+      //         .status(200)
+      //         .json({ payload: `Bye ${userName}, hope to see you back soon!` });
+      //     });
+      //   });
+      // }
+
     } catch (error) {
       let errorData = {
         title: "Error logging out",
@@ -182,15 +211,15 @@ export class SessionsController {
   static callBackGitHub = async (req, res) => {
     const email = req.user.email;
     req.user.loginStrategy = "gitHub";
-    try{
-    const u = await userService.updateUser(
-      { email },
-      { loginStrategy: "gitHub" }
-    );
-    req.session.user = req.user;
-    res.setHeader("Content-Type", "application/json");
-    return res.status(200).json({ payload: req.user });
-  } catch(error){
+    try {
+      const u = await userService.updateUser(
+        { email },
+        { loginStrategy: "gitHub" }
+      );
+      req.session.user = req.user;
+      res.setHeader("Content-Type", "application/json");
+      return res.status(200).json({ payload: req.user });
+    } catch (error) {
       let errorData = {
         title: "gitHub authentification error",
         name: error.name,
@@ -202,8 +231,8 @@ export class SessionsController {
         error: `Unexpected server error - Try again later or contact admninistrator`,
         detail: `Authentication error...!!!`,
       });
+    }
   };
-  }; 
 
   static current = (req, res) => {
     let userSessions = req.session.user;
@@ -218,13 +247,13 @@ export class SessionsController {
       res.setHeader("Content-Type", "application/json");
       return res.status(200).json({ userSessions, userJWT });
     } catch (error) {
-        let errorData = {
+      let errorData = {
         title: "Logged users error",
         name: error.name,
         message: error.message,
         stack: error.stack,
-        };
-        customLogger.error(JSON.stringify(errorData, null, 5));
+      };
+      customLogger.error(JSON.stringify(errorData, null, 5));
       res.setHeader("Content-Type", "application/json");
       return res.status(401).json({ userJWT: `${error}`, userSessions });
     }
@@ -264,8 +293,8 @@ export class SessionsController {
         name: error.name,
         message: error.message,
         stack: error.stack,
-        };
-        customLogger.error(JSON.stringify(errorData, null, 5));
+      };
+      customLogger.error(JSON.stringify(errorData, null, 5));
       res.setHeader("Content-Type", "application/json");
       return res.status(500).json({
         error: `Unexpected server error - contact your administrator`,
@@ -286,7 +315,6 @@ export class SessionsController {
     }
     const reference = req.fileSavedPath + "/" + req.fileSavedName;
     try {
-    
       const user = await userService.getUsersBy({ _id: userId });
       let documents = user.documents;
       switch (req.fileDoc) {
@@ -313,8 +341,8 @@ export class SessionsController {
         name: error.name,
         message: error.message,
         stack: error.stack,
-        };
-        customLogger.error(JSON.stringify(errorData, null, 5));
+      };
+      customLogger.error(JSON.stringify(errorData, null, 5));
       res.setHeader("Content-Type", "application/json");
       return res.status(500).json({
         error: `Unexpected server error - contact your administrator`,
