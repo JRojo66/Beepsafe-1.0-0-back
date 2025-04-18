@@ -65,21 +65,16 @@ export class SessionsController {
   };
 
   static logout = async (req, res) => {
-    
-    //      return res.status(200).json({ message: `break point!` });
     try {
       const token = req.cookies.beepcookie;
       if (!token) {
         return res.status(400).json({ error: "User is not logged in...!!!" });
       }
-
-
-  
-      // Opcionalmente: podés verificar el token para sacar el email y guardar `last_connection`
+      // Graba `last_connection`
       const user = jwt.verify(token, SECRET);
       const email = user.email;
       await userService.updateUser({ email }, { last_connection: new Date() });
-  
+      // Borra la jwt cookie
       res.clearCookie("beepcookie");
       return res.status(200).json({ message: `Bye ${user.name}, hope to see you back soon!` });
   
@@ -158,17 +153,12 @@ export class SessionsController {
 
   
   static current = (req, res) => {
-    // let userSessions = req.session.user;
-    // userSessions = new UserDTO(userSessions);
-    // if (!userSessions) {
-    //   userSessions = "No sessions users logged";
-    // }
-    let token = req.cookies["codercookie"];
+    let token = req.cookies["beepcookie"];
     try {
       let userJWT = jwt.verify(token, SECRET);
-      userJWT = new UserDTO(userJWT);
+      //userJWT = new UserDTO(userJWT);
       res.setHeader("Content-Type", "application/json");
-      return res.status(200).json({ userSessions, userJWT });
+      return res.status(200).json({userJWT});
     } catch (error) {
       let errorData = {
         title: "Logged users error",
@@ -176,7 +166,7 @@ export class SessionsController {
         message: error.message,
         stack: error.stack,
       };
-      customLogger.error(JSON.stringify(errorData, null, 5));
+      //customLogger.error(JSON.stringify(errorData, null, 5));
       res.setHeader("Content-Type", "application/json");
       return res.status(401).json({ userJWT: `${error}`}); // saque ,userSessions de atras de {error}
     }
