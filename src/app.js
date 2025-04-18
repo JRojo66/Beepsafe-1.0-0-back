@@ -1,8 +1,8 @@
 import express from "express";
 import mongoose from "mongoose";
 import { engine } from "express-handlebars";
-import sessions from "express-session";
-import MongoStore from "connect-mongo";
+//import sessions from "express-session";
+//import MongoStore from "connect-mongo";
 import { Server } from "socket.io";
 import { __dirname, middLogger, customLogger } from "./utils.js";
 import { join } from "path";
@@ -12,8 +12,8 @@ import { router as viewsRouter } from "./routes/views.Router.js";
 import { router as sessionRouter } from "./routes/sessionRouter.js";
 import {router as passwordResetRouter} from "./routes/passwordResetRouter.js";
 import {router as usersRouter} from "./routes/usersRouter.js";
-import passport from "passport";  
-import { initPassport } from "./config/passport.config.js";
+//import passport from "passport";  
+//import { initPassport } from "./config/passport.config.js";
 import cookieParser from "cookie-parser";
 import { config } from "./config/config.js";
 import { chatService } from "./services/chatService.js";
@@ -73,28 +73,28 @@ app.set("views", __dirname + "/views");
 
 app.use(middLogger);
 
-app.use(
-  // Configures sessions
-  sessions({
-    path: '/',
-    secret: config.SECRET,
-    resave: false,
-    saveUninitialized: false,
-    store: MongoStore.create({
-      ttl: 3600,
-      mongoUrl: config.MONGO_URL,
-    }),
-    cookie: {
-      httpOnly: true,
-      secure: false, // Cambiar a true si usás https
-      sameSite: "Lax", // O 'None' si tu frontend y backend están en diferentes dominios
-    },
-  })
-);
+// app.use(
+//   // Configures sessions
+//   sessions({
+//     path: '/',
+//     secret: config.SECRET,
+//     resave: false,
+//     saveUninitialized: false,
+//     store: MongoStore.create({
+//       ttl: 3600,
+//       mongoUrl: config.MONGO_URL,
+//     }),
+//     cookie: {
+//       httpOnly: true,
+//       secure: false, // Cambiar a true si usás https
+//       sameSite: "Lax", // O 'None' si tu frontend y backend están en diferentes dominios
+//     },
+//   })
+// );
 
-initPassport(); // Configures passport
-app.use(passport.initialize());
-app.use(passport.session());
+// initPassport(); // Configures passport
+// app.use(passport.initialize());
+// app.use(passport.session());
 
 app.use("/", viewsRouter);
 app.use(

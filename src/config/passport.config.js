@@ -80,38 +80,38 @@ export const initPassport = () => {
     )
   );
 
-  passport.use(
-    "github",
-    new github.Strategy(
-      {
-        clientID: "Iv23lilw42OZu4xXKicA",
-        clientSecret: "22bca2a20c3dda4b5b5b9ca2d19ac00275eb297b",
-        callbackURL: "/api/sessions/callBackGithub",
-      },
-      async (accessToken, refreshToken, profile, done) => {
-        try {
-          let name = profile._json.name;
-          let email = profile._json.email;
-          if (!name || !email) {
-            return done(null, false);
-          }
-          let user = await userService.getUsersBy({ email });
-          if (!user) {
-            //let newCart = await cartService.addCart();
-            user = await userService.createUser({
-              name,
-              email,
-              profile,
-              //cart: newCart._id,
-            });
-          }
-          return done(null, user);
-        } catch (error) {
-          return done(error);
-        }
-      }
-    )
-  );
+  // passport.use(
+  //   "github",
+  //   new github.Strategy(
+  //     {
+  //       clientID: "Iv23lilw42OZu4xXKicA",
+  //       clientSecret: "22bca2a20c3dda4b5b5b9ca2d19ac00275eb297b",
+  //       callbackURL: "/api/sessions/callBackGithub",
+  //     },
+  //     async (accessToken, refreshToken, profile, done) => {
+  //       try {
+  //         let name = profile._json.name;
+  //         let email = profile._json.email;
+  //         if (!name || !email) {
+  //           return done(null, false);
+  //         }
+  //         let user = await userService.getUsersBy({ email });
+  //         if (!user) {
+  //           //let newCart = await cartService.addCart();
+  //           user = await userService.createUser({
+  //             name,
+  //             email,
+  //             profile,
+  //             //cart: newCart._id,
+  //           });
+  //         }
+  //         return done(null, user);
+  //       } catch (error) {
+  //         return done(error);
+  //       }
+  //     }
+  //   )
+  // );
 
   passport.use(
     "current",
@@ -133,10 +133,10 @@ export const initPassport = () => {
   );
 };
 
-passport.serializeUser((user, done) => {
-  return done(null, user._id);
-});
-passport.deserializeUser(async (id, done) => {
-  let user = await userService.getUsersBy({ _id: id });
-  return done(null, user);
-});
+// passport.serializeUser((user, done) => {
+//   return done(null, user._id);
+// });
+// passport.deserializeUser(async (id, done) => {
+//   let user = await userService.getUsersBy({ _id: id });
+//   return done(null, user);
+// });
