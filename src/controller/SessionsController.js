@@ -99,31 +99,46 @@ export class SessionsController {
     try {
       let user = await userService.getUsersBy({ email });
       if (!user) return res.status(400).send(`Mail not registered...!!!`);
-      let tokenpwr = jwt.sign(user, SECRET, { expiresIn: 3600 });
-      res.cookie("resetPasswordcookie", tokenpwr, { httpOnly: true });
+      let tokenpwr = jwt.sign({ id: user._id, email: user.email }, SECRET, { expiresIn: 3600 });
+      res.cookie("resetPasswordcookie", tokenpwr, {
+        path: "/",
+        httpOnly: true,
+        secure: false,
+        sameSite: "Lax",
+        maxAge: 60 * 60 * 1000, // 1 hora
+      });  
+
       const userjwt = jwt.verify(tokenpwr, SECRET, { algorithms: ["HS256"] });
       // Send email
       const transporter = nodemailer.createTransport({
-        service: "gmail",
-        port: "587",
+        host: "smtp.gmail.com",
+        port: 465, // usar 465 para SSL
+        secure: true, // true para puerto 465, false para 587
         auth: {
           user: "javier.rojo66@gmail.com",
           pass: config.GMAIL_PASS,
         },
+        tls: {
+          rejectUnauthorized: false,
+        },
       });
-      transporter.sendMail({
+      try{
+      await transporter.sendMail({
         from: "rojozon javier.rojo66@gmail.com",
         to: user.email,
-        subject: "Reset your password",
-        html: `<a href="${config.ROOT_URL}/passwordResetForm/?token=${tokenpwr}">Reset your password</a>`,
-      });
+        subject: "Cambiar tu contraseña de Beepsafe",
+        html: `<a href="http://localhost:52917/pages/passwordResetForm.html?token=${tokenpwr}">Cambia tu contraseña de Beepsafe</a>`,
+      });} catch (err) {
+        console.error("Error al enviar el mail:", err);
+        return res.status(500).json({ error: "No se pudo enviar el email." });
+      }
       res.setHeader("Content-Type", "application/json");
       return res.status(200).json({
-        payload: `An email was sent to ${user.email}. Check your spambox if not received. Follow instructions`,
+        payload: `Se envio un mail a  ${user.email}. Si no lo recibís, revisá tu casilla de correo no deseado. Sigue las instrucciones`,
       });
     } catch (error) {
       let errorData = {
-        title: "Error reseting password",
+        title: "Error al intentar cambiar la contraseña",
         name: error.name,
         message: error.message,
         stack: error.stack,
@@ -131,7 +146,7 @@ export class SessionsController {
       customLogger.error(JSON.stringify(errorData, null, 5));
       res.setHeader("Content-Type", "application/json");
       return res.status(500).json({
-        error: `Unexpected error - Try later or contact administrator...!!!`,
+        error: `Error inesperado - Intente nuevamente más tarde, o contacte al administrador...!!!`,
       });
     }
   };

@@ -30,7 +30,13 @@ let io;
 // Configuración de CORS
 app.use(cors({
   origin: function (origin, callback) {
-      const allowedOrigins = ['http://127.0.0.1:58315', 'http://localhost:58315', 'http://127.0.0.1:8080', 'http://localhost:8080' ];
+      const allowedOrigins = [
+        'http://127.0.0.1:58315',
+        'http://localhost:58315',
+        'http://localhost:52917', 
+        'http://127.0.0.1:8080', 
+        'http://localhost:8080' 
+      ];
       if (!origin || allowedOrigins.includes(origin)) {
           callback(null, origin);
       } else {
@@ -62,39 +68,16 @@ app.use("/api-docs",swaggerUI.serve, swaggerUI.setup(spec));
 // end swagger
 
 
-app.use(express.static(__dirname + "/public"));
+//app.use(express.static(__dirname + "/public"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // allow to receive complex data from url//
 app.use(cookieParser());
 
-app.engine("handlebars", engine()); // Configures handlebars
+//app.engine("handlebars", engine()); // Configures handlebars
 app.set("view engine", "handlebars");
 app.set("views", __dirname + "/views");
 
 app.use(middLogger);
-
-// app.use(
-//   // Configures sessions
-//   sessions({
-//     path: '/',
-//     secret: config.SECRET,
-//     resave: false,
-//     saveUninitialized: false,
-//     store: MongoStore.create({
-//       ttl: 3600,
-//       mongoUrl: config.MONGO_URL,
-//     }),
-//     cookie: {
-//       httpOnly: true,
-//       secure: false, // Cambiar a true si usás https
-//       sameSite: "Lax", // O 'None' si tu frontend y backend están en diferentes dominios
-//     },
-//   })
-// );
-
-// initPassport(); // Configures passport
-// app.use(passport.initialize());
-// app.use(passport.session());
 
 app.use("/", viewsRouter);
 app.use(
