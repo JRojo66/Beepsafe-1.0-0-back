@@ -1,4 +1,4 @@
-import { SECRET } from "../utils.js";
+import { SECRET, generateHash, isValidPassword } from "../utils.js";
 import jwt from "jsonwebtoken";
 import { UserDTO } from "../dto/userDTO.js";
 import { config } from "../config/config.js";
@@ -29,26 +29,35 @@ export class SessionsController {
           .send(
             `Credenciales incorrectas. No existe un usuario con ese mail!!!`
           );
-      //user = new UserDTO(user);
-      user = { ...user };
 
-      let token = jwt.sign(user, SECRET, { expiresIn: "1h" });
-      res.cookie("beepcookie", token, {
-        path: "/",
-        httpOnly: true,
-        secure: false,
-        sameSite: "Lax",
-        maxAge: 60 * 60 * 24000, // 24 hora
-      });  
+      if (isValidPassword(password, user.password)) {
+        //user = new UserDTO(user);
+        user = { ...user };
+        let token = jwt.sign(user, SECRET, { expiresIn: "24h" });
+        res.cookie("beepcookie", token, {
+          path: "/",
+          httpOnly: true,
+          secure: false,
+          sameSite: "Lax",
+          maxAge: 60 * 60 * 24000, // 24 hora
+        });
 
-      await userService.updateUser(
-        { email },
-        { last_connection: new Date() }
-      );
-      return res.status(200).json({
-        userLogged: user,
-        token,
-      });
+        await userService.updateUser(
+          { email },
+          { last_connection: new Date() }
+        );
+        return res.status(200).json({
+          userLogged: user,
+          token,
+        });
+      } else {
+        return res
+          .status(400)
+          .send(
+            `Credenciales incorrectas. Contraseña inválida!!!`
+          );
+
+      }
     } catch (error) {
       let errorData = {
         title: "Error en el login",
@@ -76,8 +85,9 @@ export class SessionsController {
       await userService.updateUser({ email }, { last_connection: new Date() });
       // Borra la jwt cookie
       res.clearCookie("beepcookie");
-      return res.status(200).json({ message: `Bye ${user.name}, hope to see you back soon!` });
-  
+      return res
+        .status(200)
+        .json({ message: `Bye ${user.name}, hope to see you back soon!` });
     } catch (error) {
       let errorData = {
         title: "Error logging out",
@@ -91,7 +101,6 @@ export class SessionsController {
       });
     }
   };
-  
 
   static passwordReset = async (req, res) => {
     let { email } = req.body;
@@ -99,14 +108,16 @@ export class SessionsController {
     try {
       let user = await userService.getUsersBy({ email });
       if (!user) return res.status(400).send(`Mail not registered...!!!`);
-      let tokenpwr = jwt.sign({ id: user._id, email: user.email }, SECRET, { expiresIn: 3600 });
+      let tokenpwr = jwt.sign({ id: user._id, email: user.email }, SECRET, {
+        expiresIn: 3600,
+      });
       res.cookie("resetPasswordcookie", tokenpwr, {
         path: "/",
         httpOnly: true,
         secure: false,
         sameSite: "Lax",
         maxAge: 60 * 60 * 1000, // 1 hora
-      });  
+      });
 
       const userjwt = jwt.verify(tokenpwr, SECRET, { algorithms: ["HS256"] });
       // Send email
@@ -122,13 +133,77 @@ export class SessionsController {
           rejectUnauthorized: false,
         },
       });
-      try{
-      await transporter.sendMail({
-        from: "rojozon javier.rojo66@gmail.com",
-        to: user.email,
-        subject: "Cambiar tu contraseña de Beepsafe",
-        html: `<a href="http://localhost:52917/pages/passwordResetForm.html?token=${tokenpwr}">Cambia tu contraseña de Beepsafe</a>`,
-      });} catch (err) {
+      try {
+        await transporter.sendMail({
+          from: "Beepsafe javier.rojo66@gmail.com",
+          to: user.email,
+          subject: "Cambiar tu contraseña de Beepsafe",
+          html: `
+          <!DOCTYPE html>
+          <html lang="es">
+            <head>
+              <meta charset="UTF-8" />
+              <style>
+                body {
+                  font-family: Arial, sans-serif;
+                  background-color: #f7f9fa;
+                  color: #333;
+                  margin: 0;
+                  padding: 0;
+                }
+                .container {
+                  background-color: #fff;
+                  max-width: 600px;
+                  margin: 40px auto;
+                  border-radius: 10px;
+                  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+                  padding: 40px;
+                }
+                .logo {
+                  display: block;
+                  margin: 0 auto 30px;
+                  max-width: 180px;
+                }
+                h1 {
+                  color: #2c3e50;
+                }
+                p {
+                  line-height: 1.6;
+                  font-size: 16px;
+                }
+                .button {
+                  display: inline-block;
+                  background-color: #00a9b7;
+                  color: #fff;
+                  padding: 12px 24px;
+                  text-decoration: none;
+                  border-radius: 6px;
+                  margin-top: 20px;
+                }
+                .footer {
+                  font-size: 12px;
+                  color: #999;
+                  margin-top: 40px;
+                  text-align: center;
+                }
+              </style>
+            </head>
+            <body>
+              <div class="container">
+                <h1>Restablecé tu contraseña</h1>
+                <p>Hola,</p>
+                <p>Recibimos una solicitud para restablecer tu contraseña. Si fuiste vos, hacé clic en el botón de abajo:</p>
+                <a href="http://localhost:52917/pages/passwordResetForm.html?token=${tokenpwr}" class="button">Cambiar contraseña</a>
+                <p>Si no solicitaste este cambio, ignorá este correo. Tu cuenta está segura.</p>
+                <div class="footer">
+                  © BeepSafe 2025 · Este es un mensaje automático, no respondas este correo.
+                </div>
+              </div>
+            </body>
+          </html>`
+        });
+        
+      } catch (err) {
         console.error("Error al enviar el mail:", err);
         return res.status(500).json({ error: "No se pudo enviar el email." });
       }
@@ -166,14 +241,13 @@ export class SessionsController {
     });
   };
 
-  
   static current = (req, res) => {
     let token = req.cookies["beepcookie"];
     try {
       let userJWT = jwt.verify(token, SECRET);
       //userJWT = new UserDTO(userJWT);
       res.setHeader("Content-Type", "application/json");
-      return res.status(200).json({userJWT});
+      return res.status(200).json({ userJWT });
     } catch (error) {
       let errorData = {
         title: "Logged users error",
@@ -183,7 +257,7 @@ export class SessionsController {
       };
       //customLogger.error(JSON.stringify(errorData, null, 5));
       res.setHeader("Content-Type", "application/json");
-      return res.status(401).json({ userJWT: `${error}`}); // saque ,userSessions de atras de {error}
+      return res.status(401).json({ userJWT: `${error}` }); // saque ,userSessions de atras de {error}
     }
   };
 

@@ -6,14 +6,13 @@ export class PasswordResetController {
   static pwr = async (req, res) => {
     try {
       const { token, newPassword } = req.body;
-
       let decoded = jwt.verify(token, SECRET);
       const email = decoded.email;
-      const uid = decoded._id;
+      const uid = decoded.id;
       if (!decoded) {
         res.setHeader("Content-Type", "application/json");
         return res.status(401).json({
-          error: `We were unable to validate your credentials. Try againg later!!!`,
+          error: `No pudimos validar sus credenciales. Intentá nuevamente más tarde!!!`,
         });
       }
       let user = await userService.getUsersBy({ email });
@@ -21,20 +20,20 @@ export class PasswordResetController {
       if (isValidPassword(newPassword, oldPassword)) {
         res.setHeader("Content-Type", "application/json");
         return res.status(401).json({
-          error: `New password must be different than the previous one...`,
+          error: `la nueva contraseña debe ser diferente de la anterior...`,
         });
       }
       const password = generateHash(newPassword);
-      await userService.updateUser({ _id: uid }, { password: password });
 
+      await userService.updateUser({ _id: uid }, { password: password });
       res.setHeader("Content-Type", "application/json");
       return res
         .status(200)
-        .json({ payload: "Successfull password change...!!!" });
+        .json({ payload: "La clave se cambió correctamente...!!!" });
     } catch (error) {
       if (error instanceof jwt.TokenExpiredError) {
         res.setHeader("Content-Type", "application/json");
-        return res.status(401).json({ Error: "Time out... Reset again!!!" });
+        return res.status(401).json({ Error: "El tiempo para cambiar la clave expiro... Volvé a generar el mail!!!" });
       } else {
         let errorData = {
           title: "Error reseting password",

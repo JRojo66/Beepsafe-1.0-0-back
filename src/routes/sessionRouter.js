@@ -22,7 +22,6 @@
           if (err) {
             return next(err);
           }
-          console.log("user: ",user);
           return res.status(201).json({ message: "Usuario registrado exitosamente", user: user });
         });
       })(req, res, next);

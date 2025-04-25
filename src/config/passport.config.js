@@ -1,6 +1,6 @@
 import passport from "passport";
 import local from "passport-local";
-import github from "passport-github2";
+//import github from "passport-github2";
 import passportJWT from "passport-jwt";
 import { SECRET, generateHash, isValidPassword } from "../utils.js";
 import { userService } from "../services/UserService.js";
