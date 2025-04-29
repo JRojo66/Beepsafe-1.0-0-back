@@ -12,6 +12,7 @@ import { router as viewsRouter } from "./routes/views.Router.js";
 import { router as sessionRouter } from "./routes/sessionRouter.js";
 import {router as passwordResetRouter} from "./routes/passwordResetRouter.js";
 import {router as usersRouter} from "./routes/usersRouter.js";
+import { configRouter } from './routes/configRouter.js';
 //import passport from "passport";  
 //import { initPassport } from "./config/passport.config.js";
 import cookieParser from "cookie-parser";
@@ -33,7 +34,7 @@ app.use(cors({
       const allowedOrigins = [
         'http://127.0.0.1:58315',
         'http://localhost:58315',
-        'http://localhost:52917', 
+        'http://localhost:50928', 
         'http://127.0.0.1:8080', 
         'http://localhost:8080' 
       ];
@@ -47,7 +48,7 @@ app.use(cors({
   credentials: true,
 }));
 
-
+//app.set('trust proxy', 1); Puede ser necesario para el limitador de numero de intentos
 
 // Documentation - Swagger
 // Define object with parameters for swagger
@@ -92,6 +93,7 @@ app.use("/api/cart", cartRouter);
 app.use("/api/sessions", sessionRouter);
 app.use("/api/passwordReset",passwordResetRouter);
 app.use("/api/users",usersRouter)
+app.use("/api/config", configRouter);
 
 
 app.use(errorHandler);

@@ -10,9 +10,84 @@ export class SessionsController {
     res.redirect(`${config.ROOT_URL}`);
   };
 
+  // static register = async (req, res) => {
+  //   res.setHeader("Content-Type", "application/json");
+  //   return res.status(201).json({ message: "Registro OK", newUser: req.user });
+  // };
+
   static register = async (req, res) => {
-    res.setHeader("Content-Type", "application/json");
-    return res.status(201).json({ message: "Registro OK", newUser: req.user });
+    let { name, email, phone, password, password2 } = req.body;
+    if (!name.trim()) {
+      res.setHeader("Content-Type", "application/json");
+      return res.status(400).json({ payload: "Ingrese nombre" });
+    }
+    if (!email.trim()) {
+      res.setHeader("Content-Type", "application/json");
+      return res.status(400).json({ payload: "Ingrese email" });
+    } else {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ payload: "Ingrese un email válido" });
+      }
+    }
+    if (!phone.trim()) {
+      res.setHeader("Content-Type", "application/json");
+      return res.status(400).json({ payload: "Ingrese telefono" });
+    } else {
+      const phoneRegexStrictNoSeparators = /^([1-9]\d{1,3})\d{6,8}$/;
+      if (!phoneRegexStrictNoSeparators.test(phone)) {
+        return res.status(400).json({ payload: "Ingrese un telefono válido" });
+      }
+    }
+    if (!password.trim()) {
+      res.setHeader("Content-Type", "application/json");
+      return res.status(400).json({ payload: "Ingrese contraseña" });
+    }
+    if (password.length < 6) {
+      return res
+        .status(400)
+        .json({ payload: "La contraseña debe tener al menos 6 caracteres" });
+    }
+    if (password !== password2) {
+      return res.status(400).json({ payload: "Las contraseñas no coinciden" });
+    }
+    try{
+      let existsEmail = await userService.getUsersBy({ email: email });
+      let existsName = await userService.getUsersBy({ name: name });
+      console.log(existsEmail);
+      if (existsEmail) {
+        return res.status(500).json({ payload: "Ya existe un usuario registrado con ese mail" });
+      }
+      if (existsName) {
+        return res.status(400).json({ payload: "Ya existe un usuario registrado con ese nombre" });
+      }
+      password = generateHash(password);
+      //let newCart = await cartService.addCart();
+      let newUser = {
+        name,
+        phone,
+        email,
+        password,
+        last_connection: new Date(),
+        //cart: newCart._id,
+      };
+      //newUser = new UserDTOfirstLettertoUpperCase(newUser); Forces name first character to uppercase
+      newUser = await userService.createUser(newUser);
+      newUser = newUser.toJSON();
+      newUser = new UserDTO(newUser); // replaces password with ******
+      return res.status(200).json({ payload: "Felicitaciones! ya diste de alta tu cuenta en Beepsafe!" });
+    }catch{
+      let errorData = {
+        title: "Error al dar de alta un usuario",
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+      };
+      customLogger.error(JSON.stringify(errorData, null, 5));
+      return res.status(500).json({
+        error: `Unexpected error registering user - Try later or contact administrator...!!!`,
+      });
+    }
   };
 
   static login = async (req, res) => {
@@ -51,12 +126,7 @@ export class SessionsController {
           token,
         });
       } else {
-        return res
-          .status(400)
-          .send(
-            `Credenciales incorrectas. Contraseña inválida!!!`
-          );
-
+        return res.status(401).json({ error: "Credenciales inválidas" });
       }
     } catch (error) {
       let errorData = {
@@ -200,9 +270,8 @@ export class SessionsController {
                 </div>
               </div>
             </body>
-          </html>`
+          </html>`,
         });
-        
       } catch (err) {
         console.error("Error al enviar el mail:", err);
         return res.status(500).json({ error: "No se pudo enviar el email." });
