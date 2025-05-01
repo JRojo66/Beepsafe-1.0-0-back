@@ -17,9 +17,12 @@ const usersSchema = new mongoose.Schema(
       type: String,
       default: "user",
     },
-    cart: {
-      type: mongoose.Types.ObjectId,
-      ref: "cart",
+    // cart: {
+    //   type: mongoose.Types.ObjectId,
+    //   ref: "cart",
+    // },
+    activities: {
+      activity: Object,
     },
     documents: {
         type: [{
