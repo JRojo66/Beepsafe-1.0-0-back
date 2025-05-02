@@ -21,9 +21,18 @@ const usersSchema = new mongoose.Schema(
     //   type: mongoose.Types.ObjectId,
     //   ref: "cart",
     // },
-    activities: {
-      activity: Object,
-    },
+    activities: [
+      {
+        name: { type: String, required: true },
+        equipment: [
+          {
+            name: { type: String, required: true },
+            description: { type: String },
+            photo: { type: String }
+          }
+        ]
+      }
+    ],
     documents: {
         type: [{
             name: String,
