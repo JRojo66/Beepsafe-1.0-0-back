@@ -54,7 +54,6 @@ export class SessionsController {
     try{
       let existsEmail = await userService.getUsersBy({ email: email });
       let existsName = await userService.getUsersBy({ name: name });
-      console.log(existsEmail);
       if (existsEmail) {
         return res.status(500).json({ payload: "Ya existe un usuario registrado con ese mail" });
       }

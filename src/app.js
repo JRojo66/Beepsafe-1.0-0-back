@@ -11,6 +11,7 @@ import { router as cartRouter } from "./routes/cartRouter.js";
 import { router as viewsRouter } from "./routes/views.Router.js";
 import { router as sessionRouter } from "./routes/sessionRouter.js";
 import {router as passwordResetRouter} from "./routes/passwordResetRouter.js";
+import activitiesRouter from "./routes/activitiesRouter.js";
 import {router as usersRouter} from "./routes/usersRouter.js";
 import { configRouter } from './routes/configRouter.js';
 //import passport from "passport";  
@@ -94,6 +95,7 @@ app.use("/api/sessions", sessionRouter);
 app.use("/api/passwordReset",passwordResetRouter);
 app.use("/api/users",usersRouter)
 app.use("/api/config", configRouter);
+app.use("/api/activities", activitiesRouter);
 
 
 app.use(errorHandler);
@@ -103,30 +105,30 @@ const server = app.listen(PORT, () => {
 });
 
 // Chat
-let chatUsers = [];
-let messages = [];
+// let chatUsers = [];
+// let messages = [];
 
-io = new Server(server);
+// io = new Server(server);
 
-io.on("connection", (socket) => {
-  console.log(`Client id ${socket.id} connected...!!!`);
-  socket.on("id", (chatName) => {
-    chatUsers.push({ id: socket.id, chatName });
-    socket.emit("previousMessages", messages);
-    socket.broadcast.emit("New User", chatName);
-  });
-  socket.on("message", (chatName, message) => {
-    messages.push({ chatName, message });
-    chatService.addMessage(chatName, message);
-    io.emit("newMessage", chatName, message);
-  });
-  socket.on("disconnect", () => {
-    let chatUser = chatUsers.find((u) => u.id === socket.id);
-    if (chatUser) {
-      io.emit("userLogout", chatUser.chatName);
-    }
-  });
-});
+// io.on("connection", (socket) => {
+//   console.log(`Client id ${socket.id} connected...!!!`);
+//   socket.on("id", (chatName) => {
+//     chatUsers.push({ id: socket.id, chatName });
+//     socket.emit("previousMessages", messages);
+//     socket.broadcast.emit("New User", chatName);
+//   });
+//   socket.on("message", (chatName, message) => {
+//     messages.push({ chatName, message });
+//     chatService.addMessage(chatName, message);
+//     io.emit("newMessage", chatName, message);
+//   });
+//   socket.on("disconnect", () => {
+//     let chatUser = chatUsers.find((u) => u.id === socket.id);
+//     if (chatUser) {
+//       io.emit("userLogout", chatUser.chatName);
+//     }
+//   });
+// });
 
 // Connection to mongoDb
 const connDB = async () => {
