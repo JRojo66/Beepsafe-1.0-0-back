@@ -98,6 +98,7 @@ app.use("/api/config", configRouter);
 app.use("/api/activities", activitiesRouter);
 
 
+
 app.use(errorHandler);
 
 const server = app.listen(PORT, () => {

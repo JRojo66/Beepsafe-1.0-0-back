@@ -1,18 +1,19 @@
-import jwt from 'jsonwebtoken';
-import { config } from '../config/config.js';
+// middleware/authJWT.js
+import jwt from "jsonwebtoken";
+import { config } from "../config/config.js";
 
-export const authJWT = (req, res, next) => {
-  const token = req.cookies?.codercookie || req.headers.authorization?.split(' ')[1];
+export function authJWT(req, res, next) {
+  const token = req.cookies.beepcookie;
 
   if (!token) {
-    return res.status(401).json({ error: 'No token provided' });
+    return res.status(401).json({ message: "Token no encontrado en cookie." });
   }
 
   try {
     const decoded = jwt.verify(token, config.SECRET);
     req.user = decoded;
     next();
-  } catch (error) {
-    return res.status(401).json({ error: 'Token inválido o expirado' });
+  } catch (err) {
+    return res.status(403).json({ message: "Token inválido." });
   }
-};
+}
