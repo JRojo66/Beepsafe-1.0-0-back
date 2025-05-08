@@ -16,4 +16,10 @@ class UserService {
     return this.dao.update(search, update);
   };
 }
+
+  // deleteUserActivity = async (searchEmail, searchActivity) => {
+  //   return this.dao.delete(searchEmail, searchActivity);
+  // };
+
+
 export const userService = new UserService(new UserDao());

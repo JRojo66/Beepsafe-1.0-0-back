@@ -67,14 +67,40 @@ export class ActivitiesController {
         return res.status(404).json({ message: "Usuario no encontrado." });
       }
 
-      const activities = (user.activities || []).map((act) => act.name);
-      res.status(200).json(activities);
+      res.status(200).json(user.activities);
     } catch (err) {
-        console.log("xxx");
       console.error("Error al obtener actividades del usuario:", err);
       res.status(500).json({ message: "Error interno del servidor." });
     }
   }
+
+  // async deleteActivity(req, res) {
+  //   const { email, activity } = req.body;
+  //   console.log("email", email);
+  //   console.log("activity", activity);
+
+  //   if (!email || !activity) {
+  //     return res.status(400).json({ message: "Faltan datos para eliminar la actividad." });
+  //   }
+
+  //   try {
+  //     const user = await userModel.findOne({ email });
+  //     if (!user) return res.status(404).json({ message: "Usuario no encontrado." });
+
+  //     const initialCount = user.activities.length;
+  //     user.activities = user.activities.filter((a) => a.name !== activity);
+
+  //     if (user.activities.length === initialCount) {
+  //       return res.status(404).json({ message: "Actividad no encontrada." });
+  //     }
+
+  //     await user.save();
+  //     return res.status(200).json({ message: "Actividad eliminada correctamente." });
+  //   } catch (err) {
+  //     console.error(err);
+  //     return res.status(500).json({ message: "Error interno al eliminar la actividad." });
+  //   }
+  // }
 
 }
 
