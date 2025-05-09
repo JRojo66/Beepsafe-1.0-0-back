@@ -9,6 +9,7 @@ router.post("/", authJWT, activitiesController.createActivity.bind(activitiesCon
 router.get("/:email", activitiesController.getActivitiesByEmail.bind(activitiesController));
 router.get("/", activitiesController.getAllActivities.bind(activitiesController));
 router.delete("/", authJWT, activitiesController.deleteActivity.bind(activitiesController));
-
+router.post("/equipment", authJWT, activitiesController.addEquipmentToActivity.bind(activitiesController));
+router.delete("/equipment", authJWT, activitiesController.deleteEquipmentFromActivity.bind(activitiesController));
 
 export default router;

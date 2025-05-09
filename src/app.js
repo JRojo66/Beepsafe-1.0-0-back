@@ -30,24 +30,33 @@ const app = express();
 let io;
 
 // Configuración de CORS
+// app.use(cors({
+//   origin: function (origin, callback) {
+//       const allowedOrigins = [
+//         'http://127.0.0.1:58315',
+//         'http://localhost:58315',
+//         'http://localhost:50928', 
+//         'http://127.0.0.1:49922',
+//         'http://localhost:49922', 
+//         'http://127.0.0.1:8080', 
+//         'http://localhost:8080' 
+//       ];
+//       if (!origin || allowedOrigins.includes(origin)) {
+//           callback(null, origin);
+//       } else {
+//           callback(new Error('Not allowed by CORS'));
+//       }
+//   },
+//   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+//   credentials: true,
+// }));
+
 app.use(cors({
-  origin: function (origin, callback) {
-      const allowedOrigins = [
-        'http://127.0.0.1:58315',
-        'http://localhost:58315',
-        'http://localhost:50928', 
-        'http://127.0.0.1:8080', 
-        'http://localhost:8080' 
-      ];
-      if (!origin || allowedOrigins.includes(origin)) {
-          callback(null, origin);
-      } else {
-          callback(new Error('Not allowed by CORS'));
-      }
-  },
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  origin: true,  //  <=====  For testing ONLY.  Use a specific origin in production!
   credentials: true,
 }));
+
+
 
 //app.set('trust proxy', 1); Puede ser necesario para el limitador de numero de intentos
 

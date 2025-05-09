@@ -99,15 +99,23 @@ export class SessionsController {
       let user = await userService.getUsersBy({ email });
       if (!user)
         return res
-          .status(400)
-          .send(
-            `Credenciales incorrectas. No existe un usuario con ese mail!!!`
-          );
-
+      .status(400)
+      .send(
+        `Credenciales incorrectas. No existe un usuario con ese mail!!!`
+      );
       if (isValidPassword(password, user.password)) {
         //user = new UserDTO(user);
         user = { ...user };
-        let token = jwt.sign(user, SECRET, { expiresIn: "24h" });
+
+        // Data to include in cookie
+        const payload = {
+          name: user.name,
+          _id: user._id,
+          email: user.email,
+          role: user.role
+        };
+
+        let token = jwt.sign(payload, SECRET, { expiresIn: "24h" });
         res.cookie("beepcookie", token, {
           path: "/",
           httpOnly: true,
